@@ -180,6 +180,50 @@ client.on('raw', async (packet) => {
                 console.log(`   📋 Message: ${response.data.message}`);
             } else {
                 console.log(`   ❌ Erreur: ${response.data.message}`);
+                
+                // Si la session est complète, retirer la réaction et envoyer un message
+                if (response.data.is_full && threadId) {
+                    try {
+                        // Retirer la réaction via l'API REST Discord
+                        // Les bots ne peuvent pas retirer les réactions des autres utilisateurs directement
+                        // On doit utiliser l'API REST avec le token du bot
+                        const rest = new REST({ version: '10' }).setToken(BOT_TOKEN);
+                        
+                        // Encoder l'emoji ✅ pour l'URL
+                        const emojiEncoded = encodeURIComponent('✅');
+                        
+                        // Retirer la réaction via l'API REST
+                        await rest.delete(
+                            Routes.channelMessageReactionUser(
+                                data.channel_id,
+                                data.message_id,
+                                emojiEncoded,
+                                data.user_id
+                            )
+                        );
+                        console.log(`   🔄 Réaction retirée automatiquement (formation complète)`);
+                        
+                        // Envoyer un message dans le thread pour notifier la liste d'attente
+                        // On doit appeler l'API Symfony pour envoyer le message
+                        const waitlistUrl = API_URL.replace('/reaction', '/waitlist-message');
+                        await axios.post(waitlistUrl, {
+                            thread_id: threadId,
+                            user_id: data.user_id,
+                            username: displayName
+                        }, {
+                            timeout: 10000,
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        console.log(`   📝 Message de liste d'attente envoyé`);
+                    } catch (error) {
+                        console.error(`   ❌ Erreur lors de la gestion de la liste d'attente:`, error.message);
+                        if (error.response) {
+                            console.error(`   📋 Détails:`, error.response.data);
+                        }
+                    }
+                }
             }
         } else if (packet.t === 'MESSAGE_REACTION_REMOVE') {
             // Récupérer le canal pour vérifier si c'est un thread
