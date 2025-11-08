@@ -275,13 +275,22 @@ client.on('interactionCreate', async (interaction) => {
             
             console.log(`📊 Récupération de ${members.size} membres pour l'export...`);
             
+            // Debug: Afficher quelques exemples de nicknames pour vérifier
+            let debugCount = 0;
+            for (const member of members.values()) {
+                if (debugCount < 3) {
+                    console.log(`   Exemple membre: ${member.user.username}, nickname: ${member.nickname || 'vide'}, displayName: ${member.displayName}`);
+                    debugCount++;
+                }
+            }
+            
             // Préparer les données CSV
             const csvRows = [];
-            csvRows.push('Pseudo,Nickname,Rôles,ID Utilisateur,Date d\'arrivée,Discriminator,Compte créé le');
+            csvRows.push('Pseudo,Rôles,ID Utilisateur,Date d\'arrivée,Compte créé le');
             
             for (const member of members.values()) {
-                const pseudo = member.user.username;
-                const nickname = member.nickname || '';
+                // Utiliser displayName qui retourne le nickname s'il existe, sinon le username
+                const pseudo = member.displayName || member.user.username;
                 const roles = member.roles.cache
                     .filter(role => role.name !== '@everyone')
                     .sort((a, b) => b.position - a.position) // Trier par position (du plus haut au plus bas)
@@ -291,7 +300,6 @@ client.on('interactionCreate', async (interaction) => {
                 // Mettre l'ID entre guillemets pour éviter la notation scientifique dans Excel
                 const userIdFormatted = `"${userId}"`;
                 const joinedAt = member.joinedAt ? member.joinedAt.toISOString().split('T')[0] : 'N/A';
-                const discriminator = member.user.discriminator !== '0' ? member.user.discriminator : 'N/A';
                 const createdAt = member.user.createdAt ? member.user.createdAt.toISOString().split('T')[0] : 'N/A';
                 
                 // Échapper les virgules et guillemets dans les valeurs CSV
@@ -305,11 +313,9 @@ client.on('interactionCreate', async (interaction) => {
                 
                 csvRows.push([
                     escapeCsv(pseudo),
-                    escapeCsv(nickname),
                     escapeCsv(roles),
                     userIdFormatted,
                     joinedAt,
-                    discriminator,
                     createdAt
                 ].join(','));
             }

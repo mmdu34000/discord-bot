@@ -22,24 +22,23 @@ Dans Discord, utilisez la commande slash :
 
 Le fichier CSV contient les colonnes suivantes :
 
-1. **Pseudo** : Le pseudo Discord global de l'utilisateur
-2. **Nickname** : Le surnom sur le serveur (vide si non défini)
-3. **Rôles** : Liste des rôles séparés par `;` (exclut @everyone, triés par importance)
-4. **ID Utilisateur** : L'ID unique Discord de l'utilisateur (entre guillemets pour Excel)
-5. **Date d'arrivée** : Date à laquelle l'utilisateur a rejoint le serveur (format YYYY-MM-DD)
-6. **Discriminator** : L'ancien discriminator Discord (N/A pour les nouveaux comptes)
-7. **Compte créé le** : Date de création du compte Discord (format YYYY-MM-DD)
+1. **Pseudo** : Le nickname du serveur s'il existe, sinon le pseudo Discord global
+2. **Rôles** : Liste des rôles séparés par `;` (exclut @everyone, triés par importance)
+3. **ID Utilisateur** : L'ID unique Discord de l'utilisateur (entre guillemets pour Excel)
+4. **Date d'arrivée** : Date à laquelle l'utilisateur a rejoint le serveur (format YYYY-MM-DD)
+5. **Compte créé le** : Date de création du compte Discord (format YYYY-MM-DD)
 
 ### Exemple de fichier CSV
 
 ```csv
-Pseudo,Nickname,Rôles,ID Utilisateur,Date d'arrivée,Discriminator,Compte créé le
-john_doe,John,Admin; Modérateur,"123456789012345678",2024-01-15,1234,2020-05-10
-jane_smith,Jane,Membre,"987654321098765432",2024-02-20,5678,2021-03-15
-bob_wilson,,Aucun rôle,"456789012345678901",2024-03-10,N/A,2022-01-20
+Pseudo,Rôles,ID Utilisateur,Date d'arrivée,Compte créé le
+John,Admin; Modérateur,"123456789012345678",2024-01-15,2020-05-10
+Jane,Membre,"987654321098765432",2024-02-20,2021-03-15
+bob_wilson,Aucun rôle,"456789012345678901",2024-03-10,2022-01-20
 ```
 
 **Note importante** : 
+- La colonne "Pseudo" affiche le nickname du serveur s'il existe, sinon le username Discord
 - L'ID utilisateur est entre guillemets pour éviter qu'Excel l'affiche en notation scientifique
 - Si un utilisateur n'a pas de rôles, "Aucun rôle" sera affiché
 - Les rôles sont triés par ordre d'importance (du plus haut au plus bas)
