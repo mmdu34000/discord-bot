@@ -76,6 +76,38 @@ Vous devriez voir :
       ✅ [Pseudo] inscrit avec succès à la session
    ```
 
+## 📊 Export des membres
+
+Le bot dispose d'une commande slash pour exporter tous les membres du serveur :
+
+### Utilisation
+
+1. Dans Discord, tapez `/export-members`
+2. Le bot générera un fichier CSV avec :
+   - Pseudo Discord
+   - Nickname du serveur (si défini)
+   - Rôles
+   - ID utilisateur
+   - Date d'arrivée sur le serveur
+
+### Permissions
+
+⚠️ Seuls les **administrateurs** peuvent utiliser cette commande.
+
+### Emplacement des fichiers
+
+Les fichiers CSV sont sauvegardés dans le dossier `exports/` à la racine du projet bot.
+
+Par défaut : `/var/www/discord-bot/exports/`
+
+### Format du fichier CSV
+
+```csv
+Pseudo,Nickname,Rôles,ID Utilisateur,Date d'arrivée
+username1,Nickname1,Admin; Modérateur,123456789,2024-01-15
+username2,,Membre,987654321,2024-02-20
+```
+
 ## 🔧 Dépannage
 
 ### Le bot ne se connecte pas

@@ -34,6 +34,10 @@ tmp/
 temp/
 *.tmp
 
+# Exports CSV
+exports/
+*.csv
+
 # Fichiers de sauvegarde
 *.bak
 *.backup

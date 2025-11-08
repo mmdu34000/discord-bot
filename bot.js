@@ -1,5 +1,7 @@
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 
 // ============================================
 // CONFIGURATION - MODIFIEZ CES VALEURS
@@ -10,6 +12,7 @@ require('dotenv').config();
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const API_URL = process.env.API_URL || 'https://api.vps115454.serveur-vps.net/api/discord/reaction';
+const EXPORT_DIR = process.env.EXPORT_DIR || path.join(__dirname, 'exports');
 
 // ============================================
 // CRÉATION DU CLIENT DISCORD
@@ -29,7 +32,7 @@ const client = new Client({
 // ============================================
 // Note: L'avertissement de dépréciation pour 'ready' peut être ignoré
 // Il sera renommé en 'clientReady' dans discord.js v15, mais 'ready' fonctionne toujours en v14
-client.once('ready', () => {
+client.once('ready', async () => {
     console.log('═══════════════════════════════════════');
     console.log(`✅ Bot connecté en tant que ${client.user.tag}!`);
     console.log(`📋 ID du bot: ${client.user.id}`);
@@ -37,6 +40,38 @@ client.once('ready', () => {
     console.log('═══════════════════════════════════════');
     console.log('🤖 Bot prêt à écouter les réactions ✅');
     console.log('═══════════════════════════════════════');
+    
+    // Créer le dossier d'export s'il n'existe pas
+    if (!fs.existsSync(EXPORT_DIR)) {
+        fs.mkdirSync(EXPORT_DIR, { recursive: true });
+        console.log(`📁 Dossier d'export créé: ${EXPORT_DIR}`);
+    }
+    
+    // Enregistrer les commandes slash
+    try {
+        const rest = new REST({ version: '10' }).setToken(BOT_TOKEN);
+        
+        const commands = [
+            new SlashCommandBuilder()
+                .setName('export-members')
+                .setDescription('Exporte tous les membres du serveur avec leur pseudo et rôles dans un fichier CSV')
+                .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+                .toJSON()
+        ];
+        
+        console.log('🔄 Enregistrement des commandes slash...');
+        
+        // Enregistrer les commandes globalement (peut prendre jusqu'à 1 heure pour se propager)
+        // Pour un déploiement plus rapide, on peut aussi les enregistrer par serveur
+        const data = await rest.put(
+            Routes.applicationCommands(client.user.id),
+            { body: commands }
+        );
+        
+        console.log(`✅ ${data.length} commande(s) slash enregistrée(s)`);
+    } catch (error) {
+        console.error('❌ Erreur lors de l\'enregistrement des commandes:', error);
+    }
 });
 
 // ============================================
@@ -206,6 +241,97 @@ client.on('raw', async (packet) => {
             console.error(`   📍 URL: ${API_URL}`);
         } else {
             console.error(`   ❌ Erreur:`, error.message);
+        }
+    }
+});
+
+// ============================================
+// ÉVÉNEMENT : Commandes slash
+// ============================================
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isChatInputCommand()) return;
+    
+    if (interaction.commandName === 'export-members') {
+        await interaction.deferReply({ ephemeral: true });
+        
+        try {
+            const guild = interaction.guild;
+            if (!guild) {
+                await interaction.editReply('❌ Cette commande doit être utilisée dans un serveur.');
+                return;
+            }
+            
+            // Vérifier les permissions
+            if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+                await interaction.editReply('❌ Vous devez être administrateur pour utiliser cette commande.');
+                return;
+            }
+            
+            await interaction.editReply('⏳ Export en cours... Cela peut prendre quelques instants.');
+            
+            // Récupérer tous les membres du serveur
+            await guild.members.fetch();
+            const members = guild.members.cache.filter(member => !member.user.bot);
+            
+            // Préparer les données CSV
+            const csvRows = [];
+            csvRows.push('Pseudo,Nickname,Rôles,ID Utilisateur,Date d\'arrivée');
+            
+            for (const member of members.values()) {
+                const pseudo = member.user.username;
+                const nickname = member.nickname || '';
+                const roles = member.roles.cache
+                    .filter(role => role.name !== '@everyone')
+                    .map(role => role.name)
+                    .join('; ');
+                const userId = member.user.id;
+                const joinedAt = member.joinedAt ? member.joinedAt.toISOString().split('T')[0] : 'N/A';
+                
+                // Échapper les virgules et guillemets dans les valeurs CSV
+                const escapeCsv = (value) => {
+                    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                        return `"${value.replace(/"/g, '""')}"`;
+                    }
+                    return value;
+                };
+                
+                csvRows.push([
+                    escapeCsv(pseudo),
+                    escapeCsv(nickname),
+                    escapeCsv(roles),
+                    userId,
+                    joinedAt
+                ].join(','));
+            }
+            
+            // Générer le nom du fichier avec timestamp
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0] + '_' + 
+                            new Date().toTimeString().split(' ')[0].replace(/:/g, '-');
+            const filename = `export-members-${guild.name.replace(/[^a-z0-9]/gi, '_')}-${timestamp}.csv`;
+            const filepath = path.join(EXPORT_DIR, filename);
+            
+            // Écrire le fichier CSV
+            fs.writeFileSync(filepath, csvRows.join('\n'), 'utf8');
+            
+            const fileSize = (fs.statSync(filepath).size / 1024).toFixed(2);
+            
+            console.log(`📊 Export CSV créé: ${filepath}`);
+            console.log(`   📋 ${members.size} membres exportés`);
+            console.log(`   💾 Taille: ${fileSize} KB`);
+            
+            await interaction.editReply({
+                content: `✅ Export terminé!\n\n` +
+                        `📊 **${members.size}** membres exportés\n` +
+                        `💾 Fichier: \`${filename}\`\n` +
+                        `📁 Chemin: \`${filepath}\`\n` +
+                        `📏 Taille: ${fileSize} KB`
+            });
+            
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'export:', error);
+            await interaction.editReply({
+                content: `❌ Erreur lors de l'export: ${error.message}`
+            });
         }
     }
 });
