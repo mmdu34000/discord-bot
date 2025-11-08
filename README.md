@@ -103,10 +103,12 @@ Par défaut : `/var/www/discord-bot/exports/`
 ### Format du fichier CSV
 
 ```csv
-Pseudo,Nickname,Rôles,ID Utilisateur,Date d'arrivée
-username1,Nickname1,Admin; Modérateur,123456789,2024-01-15
-username2,,Membre,987654321,2024-02-20
+Pseudo,Nickname,Rôles,ID Utilisateur,Date d'arrivée,Discriminator,Compte créé le
+username1,Nickname1,Admin; Modérateur,"123456789012345678",2024-01-15,1234,2020-05-10
+username2,,Membre,"987654321098765432",2024-02-20,5678,2021-03-15
 ```
+
+**Note** : L'ID utilisateur est entre guillemets pour éviter la notation scientifique dans Excel.
 
 ## 🔧 Dépannage
 

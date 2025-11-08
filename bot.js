@@ -269,38 +269,48 @@ client.on('interactionCreate', async (interaction) => {
             
             await interaction.editReply('⏳ Export en cours... Cela peut prendre quelques instants.');
             
-            // Récupérer tous les membres du serveur
-            await guild.members.fetch();
+            // Récupérer tous les membres du serveur avec leurs rôles
+            await guild.members.fetch({ force: true });
             const members = guild.members.cache.filter(member => !member.user.bot);
+            
+            console.log(`📊 Récupération de ${members.size} membres pour l'export...`);
             
             // Préparer les données CSV
             const csvRows = [];
-            csvRows.push('Pseudo,Nickname,Rôles,ID Utilisateur,Date d\'arrivée');
+            csvRows.push('Pseudo,Nickname,Rôles,ID Utilisateur,Date d\'arrivée,Discriminator,Compte créé le');
             
             for (const member of members.values()) {
                 const pseudo = member.user.username;
                 const nickname = member.nickname || '';
                 const roles = member.roles.cache
                     .filter(role => role.name !== '@everyone')
+                    .sort((a, b) => b.position - a.position) // Trier par position (du plus haut au plus bas)
                     .map(role => role.name)
-                    .join('; ');
+                    .join('; ') || 'Aucun rôle';
                 const userId = member.user.id;
+                // Mettre l'ID entre guillemets pour éviter la notation scientifique dans Excel
+                const userIdFormatted = `"${userId}"`;
                 const joinedAt = member.joinedAt ? member.joinedAt.toISOString().split('T')[0] : 'N/A';
+                const discriminator = member.user.discriminator !== '0' ? member.user.discriminator : 'N/A';
+                const createdAt = member.user.createdAt ? member.user.createdAt.toISOString().split('T')[0] : 'N/A';
                 
                 // Échapper les virgules et guillemets dans les valeurs CSV
                 const escapeCsv = (value) => {
-                    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-                        return `"${value.replace(/"/g, '""')}"`;
+                    const str = String(value || '');
+                    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                        return `"${str.replace(/"/g, '""')}"`;
                     }
-                    return value;
+                    return str;
                 };
                 
                 csvRows.push([
                     escapeCsv(pseudo),
                     escapeCsv(nickname),
                     escapeCsv(roles),
-                    userId,
-                    joinedAt
+                    userIdFormatted,
+                    joinedAt,
+                    discriminator,
+                    createdAt
                 ].join(','));
             }
             
