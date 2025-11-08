@@ -24,7 +24,7 @@ Créez un fichier `.env` à la racine du projet :
 
 ```
 BOT_TOKEN=votre_token_bot_discord
-API_URL=http://localhost:8000/api/discord/reaction
+API_URL=https://api.vps115454.serveur-vps.net/api/discord/reaction
 ```
 
 Le code utilise automatiquement ces variables d'environnement.
@@ -37,8 +37,8 @@ Le code utilise automatiquement ces variables d'environnement.
 5. ⚠️ **NE PARTAGEZ JAMAIS CE TOKEN**
 
 **URL de l'API :**
-- Si votre API est en local : `http://localhost:8000/api/discord/reaction`
-- Si votre API est en ligne : `https://votre-domaine.com/api/discord/reaction`
+- En production : `https://api.vps115454.serveur-vps.net/api/discord/reaction`
+- En local (développement) : `http://localhost:8000/api/discord/reaction`
 
 ### Étape 3 : Vérifier les Intents Discord
 

@@ -13,7 +13,7 @@ Puis ajoutez-y :
 
 ```
 BOT_TOKEN=VOTRE_TOKEN_BOT_DISCORD
-API_URL=http://localhost:8000/api/discord/reaction
+API_URL=https://api.vps115454.serveur-vps.net/api/discord/reaction
 ```
 
 ⚠️ **Le fichier `.env` est dans `.gitignore` et ne sera jamais commité.**

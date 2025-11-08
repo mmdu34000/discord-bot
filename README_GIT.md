@@ -23,7 +23,7 @@ cp .env.example .env
 Puis éditez `.env` :
 ```
 BOT_TOKEN=VOTRE_TOKEN_BOT_DISCORD
-API_URL=http://localhost:8000/api/discord/reaction
+API_URL=https://api.vps115454.serveur-vps.net/api/discord/reaction
 ```
 
 ### 2. Initialiser Git (si pas déjà fait)

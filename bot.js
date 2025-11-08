@@ -9,7 +9,7 @@ const axios = require('axios');
 require('dotenv').config();
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const API_URL = process.env.API_URL || 'http://localhost:8000/api/discord/reaction';
+const API_URL = process.env.API_URL || 'https://api.vps115454.serveur-vps.net/api/discord/reaction';
 
 // ============================================
 // CRÉATION DU CLIENT DISCORD
@@ -236,9 +236,9 @@ if (!BOT_TOKEN) {
     process.exit(1);
 }
 
-if (API_URL === 'http://localhost:8000/api/discord/reaction') {
+if (API_URL.includes('localhost')) {
     console.warn('⚠️ ATTENTION: API_URL est configurée sur localhost');
-    console.warn('   Si votre API est ailleurs, modifiez API_URL dans bot.js');
+    console.warn('   Si votre API est ailleurs, modifiez API_URL dans le fichier .env');
 }
 
 client.login(BOT_TOKEN).catch((error) => {
