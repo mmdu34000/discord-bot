@@ -1,0 +1,40 @@
+# Dépendances
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Fichiers de configuration sensibles
+.env
+.env.local
+.env.*.local
+config.json
+# ⚠️ IMPORTANT: Ne jamais commiter le fichier .env qui contient le token du bot !
+
+# Logs
+logs/
+*.log
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Fichiers temporaires
+tmp/
+temp/
+*.tmp
+
+# Fichiers de sauvegarde
+*.bak
+*.backup
+
