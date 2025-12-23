@@ -11,7 +11,7 @@ const path = require('path');
 require('dotenv').config();
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const API_URL = process.env.API_URL || 'https://api.vps115454.serveur-vps.net/api/discord/reaction';
+const API_URL = process.env.API_URL || 'http://srv1184881.hstgr.cloud/api/discord/reaction';
 const EXPORT_DIR = process.env.EXPORT_DIR || path.join(__dirname, 'exports');
 
 // ============================================
